@@ -1,38 +1,102 @@
 import { useEffect, useState } from 'react';
-import { generateClient } from 'aws-amplify/data';
-import type { Schema } from '../amplify/data/resource';
+import { ChannelFilters, ChannelOptions, ChannelSort, StreamChat } from 'stream-chat';
+import {
+  Chat,
+  Channel,
+  ChannelHeader,
+  ChannelList,
+  MessageInput,
+  MessageList,
+  Thread,
+  Window
+} from 'stream-chat-react';
+import 'stream-chat-react/dist/css/v2/index.css';
 
-const client = generateClient<Schema>();
+const API_KEY = import.meta.env.VITE_STREAM_API_KEY; // Replace with your Stream API key
+const client = StreamChat.getInstance(API_KEY);
 
 function App () {
-  const [todos, setTodos] = useState<Array<Schema['Todo']['type']>>([]);
+  const [clientReady, setClientReady] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    client.models.Todo.observeQuery().subscribe({ next: data => setTodos([...data.items]) });
+    const setupClient = async () => {
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/stream/token`, {
+          method : 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body   : JSON.stringify({ userId: 'example-user' })
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Failed to get token');
+        }
+
+        const { token } = await response.json();
+
+        await client.connectUser(
+          {
+            id  : 'example-user',
+            name: 'Example User'
+          },
+          token
+        );
+
+        setClientReady(true);
+      } catch (e) {
+        console.error('Error connecting user:', error);
+        setError(e instanceof Error ? e.message : 'Unknown error occurred');
+      }
+    };
+
+    setupClient();
+
+    return () => {
+      client.disconnectUser();
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  function createTodo () {
-    // eslint-disable-next-line no-alert
-    client.models.Todo.create({ content: window.prompt('Todo content') });
+  if (error) {
+    return <div>Error: {error}</div>;
   }
 
+  if (!clientReady) {
+    return <div>Loading...</div>;
+  }
+
+  const filters: ChannelFilters = {
+    type   : 'messaging',
+    members: { $in: ['example-user'] }
+  };
+  const options: ChannelOptions = {
+    state   : true,
+    presence: true,
+    limit   : 10
+  };
+  const sort: ChannelSort = {
+    last_message_at: -1,
+    updated_at     : -1
+  };
+
   return (
-    <main>
-      <h1>My todos</h1>
-      <button onClick={createTodo}>+ new</button>
-      <ul>
-        {todos.map(todo => (
-          <li key={todo.id}>{todo.content}</li>
-        ))}
-      </ul>
-      <div>
-        🥳 App successfully hosted. Try creating a new todo.
-        <br />
-        <a href="https://docs.amplify.aws/react/start/quickstart/#make-frontend-updates">
-          Review next step of this tutorial.
-        </a>
-      </div>
-    </main>
+    <Chat client={client}>
+      <ChannelList
+        filters={filters}
+        sort={sort}
+        options={options}
+        showChannelSearch
+      />
+      <Channel>
+        <Window>
+          <ChannelHeader />
+          <MessageList />
+          <MessageInput focus />
+        </Window>
+        <Thread />
+      </Channel>
+    </Chat>
   );
 }
 
