@@ -207,7 +207,7 @@ export default [
       'function-paren-newline'   : ['error', 'consistent'],
       'id-length'                : ['warn', {
         min       : 2,
-        exceptions: ['_', 'x', 'y', 'a', 'b', 'e', 'p', 'm']
+        exceptions: ['_', 'x', 'y', 'a', 'b', 'e', 'p', 'm', 'i']
       }],
       'id-match'                : 0,
       'implicit-arrow-linebreak': ['error', 'beside'],

@@ -1,0 +1,92 @@
+:root {
+  --app-height: 100%;
+  --min-workspace-width: 330px;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+#root {
+  display: flex;
+  height: 100%;
+}
+
+.messaging__sidebar {
+  width: var(--min-workspace-width);
+}
+
+.str-chat__channel {
+  flex: 1;
+  min-width: 0;
+}
+
+.str-chat__main-panel {
+  flex: 1;
+  min-width: 0;
+}
+
+.str-chat__chat-view__channels .str-chat__main-panel--thread-open {
+  display: none;
+}
+
+.str-chat__chat-view__channels .str-chat__thread {
+  flex: 0 1 var(--min-workspace-width);
+  max-width: 45%;
+}
+
+.str-chat__chat-view__threads .str-chat__thread-list-container {
+  max-width: var(--min-workspace-width);
+}
+
+/* Mobile View */
+@media screen and (width <= 640px) {
+  /*
+     * This is to prevent the browser navigation bars from hiding the app
+     * on some mobile browsers. The app-height variable is set dynamically
+     * using javascript.
+     */
+  .str-chat__channel {
+    height: var(--app-height);
+  }
+
+  #mobile-channel-list {
+    height: 100vh;
+    left: 0;
+    position: fixed;
+    top: 0;
+    transform: translate3d(-100vw, 0, 0);
+    transition: transform 0.3s cubic-bezier(0, 0.52, 0, 1);
+    width: 100vw;
+  }
+
+  #mobile-channel-list.show {
+    transform: translate3d(0, 0, 0);
+    z-index: 1000;
+  }
+}
+
+/* To fix inherited styles (as per Team and Customer Support apps */
+@media screen and (width <= 960px) {
+  .str-chat__channel-list {
+    left: unset;
+    min-height: unset;
+    overflow-y: unset;
+    position: unset;
+    top: unset;
+    transition: unset;
+    z-index: unset;
+  }
+
+  .str-chat__chat-view__channels .str-chat__thread {
+    flex: 1;
+    left: 0;
+    max-width: 100%;
+    position: absolute;
+    right: 0;
+    z-index: 1;
+  }
+}

@@ -1,0 +1,93 @@
+.messaging__channel-header {
+  align-items: center;
+  background: var(--str-chat__secondary-background-color);
+  border-radius: 10px 10px 0 0;
+  box-shadow: var(--messaging__header-shadow);
+  display: flex;
+  justify-content: space-between;
+  min-height: 60px;
+  transform: matrix(1, 0, 0, 1, 0, 0);
+  z-index: 1;
+}
+
+.str-chat__channel .str-chat__main-panel:not(:last-child) .messaging__channel-header {
+  border-radius: 10px 0 0;
+}
+
+.messaging__channel-header .channel-header__name {
+  color: var(--str-chat__message-textarea-color);
+  flex: 1;
+  font-size: 15px;
+  font-weight: bold;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.str-chat.str-chat__theme-dark .messaging__channel-header {
+  background: rgb(46 48 51 / 98%);
+  box-shadow: var(--messaging__header-shadow);
+}
+
+.str-chat.str-chat__theme-dark .messaging__channel-header .channel-header__name {
+  color: var(--str-chat__message-textarea-color);
+}
+
+.messaging__channel-header__right {
+  align-items: center;
+  display: flex;
+  margin-right: 16px;
+}
+
+.messaging__channel-header .avatar-group {
+  margin-left: 20px;
+  margin-right: 20px;
+}
+
+.messaging__channel-header .avatar-group.four span:nth-child(2) {
+  position: relative;
+  right: 9px;
+}
+
+.channel-header__edit-input {
+  background: none;
+  border: none;
+  font-family: "Helvetica Neue", sans-serif;
+  font-size: 17px;
+  outline: none;
+  padding: 0;
+  width: 100%;
+}
+
+.channel-header__edit-input::placeholder {
+  opacity: 0.5;
+}
+
+.str-chat.str-chat__theme-dark .channel-header__edit-input::placeholder {
+  color: #fff;
+}
+
+.str-chat.str-chat__theme-dark .channel-header__edit-input {
+  color: #fff;
+}
+
+#mobile-nav-icon {
+  display: none;
+}
+
+@media screen and (width <= 640px) {
+  #mobile-nav-icon {
+    display: block;
+    padding-left: 5px;
+  }
+
+  .str-chat__theme-light #mobile-nav-icon svg path {
+    fill: darkslategrey;
+    fill-opacity: 0.6;
+    stroke: darkslategrey;
+  }
+
+  .messaging__channel-header__avatars {
+    margin-left: 10px;
+  }
+}

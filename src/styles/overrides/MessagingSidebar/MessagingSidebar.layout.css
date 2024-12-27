@@ -1,0 +1,33 @@
+.messaging__sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  height: 100%;
+}
+
+.messaging__channel-list__header {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+  padding-inline: 25px;
+  padding-top: 30px;
+}
+
+.messaging__channel-list__header__name {
+  font-size: 16px;
+  line-height: 20px;
+  overflow-x: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.messaging__channel-list__header__button {
+  align-items: center;
+  display: flex;
+  justify-content: center;
+  padding: 11px;
+}
+
+.str-chat__load-more-button {
+  display: none;
+}

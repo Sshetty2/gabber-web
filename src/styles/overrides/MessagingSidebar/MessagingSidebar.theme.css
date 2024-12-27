@@ -1,0 +1,43 @@
+.messaging__sidebar {
+    background: var(--str-chat__channel-list-background-color);
+}
+
+.str-chat.str-chat__theme-dark .messaging__channel-list__message {
+    color: #fff;
+}
+
+.messaging__channel-list__header__name {
+    color: var(--str-chat__text-color);
+    font-weight: bold;
+}
+
+
+.messaging__channel-list__header__button {
+    background: #fafafa;
+    border: 0;
+    border-radius: 20px;
+    box-shadow: var(--str-chat__channel-box-shadow);
+    cursor: pointer;
+}
+
+.str-chat__theme-dark .messaging__channel-list__header__button {
+    background: #3e3e41;
+    box-shadow: none;
+}
+
+.messaging__channel-list__header__button svg path {
+    fill: var(--str-chat__primary-color);
+}
+
+.str-chat__theme-dark .messaging__channel-list__header__button svg path {
+    fill: #e9e9ea;
+}
+
+.messaging__channel-list__header__button:focus {
+    border: none;
+    outline: none;
+}
+
+.messaging__channel-list__message {
+    color: #000;
+}

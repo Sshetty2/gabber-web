@@ -1,103 +1,110 @@
-import { useEffect, useState } from 'react';
-import { ChannelFilters, ChannelOptions, ChannelSort, StreamChat } from 'stream-chat';
+import { useState } from 'react';
+import type { ChannelFilters, ChannelOptions, ChannelSort } from 'stream-chat';
 import {
-  Chat,
   Channel,
-  ChannelHeader,
-  ChannelList,
-  MessageInput,
-  MessageList,
+  Chat,
+  ChatView,
   Thread,
-  Window
+  ThreadList,
+  useCreateChatClient
 } from 'stream-chat-react';
+import clsx from 'clsx';
+import { EmojiPicker } from 'stream-chat-react/emojis';
+import data from '@emoji-mart/data';
+import { init, SearchIndex } from 'emoji-mart';
+import {
+  ChannelInner,
+  MessagingSidebar,
+  MessagingThreadHeader,
+  SendButton
+} from './components';
+import { GiphyContextProvider, useThemeContext } from './context';
+import { useChecklist, useMobileView, useUpdateAppHeightOnResize } from './hooks';
+import { StreamChatGenerics } from './types';
+
+import './styles/index.css';
 import 'stream-chat-react/dist/css/v2/index.css';
 
-const API_KEY = import.meta.env.VITE_STREAM_API_KEY; // Replace with your Stream API key
-const client = StreamChat.getInstance(API_KEY);
+init({ data });
 
-function App () {
-  const [clientReady, setClientReady] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+type AppProps = {
+  apiKey: string;
+  userToConnect: { id: string; name?: string; image?: string };
+  userToken: string;
+  channelListOptions: {
+    options: ChannelOptions;
+    filters: ChannelFilters;
+    sort: ChannelSort;
+  };
+};
 
-  useEffect(() => {
-    const setupClient = async () => {
-      try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/stream/token`, {
-          method : 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body   : JSON.stringify({ userId: 'example-user' })
-        });
+const EmojiPickerWithTheme = () => {
+  const { theme } = useThemeContext();
 
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || 'Failed to get token');
-        }
+  return <EmojiPicker pickerProps={{ theme }} />;
+};
 
-        const { token } = await response.json();
+const App = (props: AppProps) => {
+  const { apiKey, userToConnect, channelListOptions, userToken } = props;
+  const [isCreating, setIsCreating] = useState(false);
 
-        await client.connectUser(
-          {
-            id  : 'example-user',
-            name: 'Example User'
-          },
-          token
-        );
+  const chatClient = useCreateChatClient<StreamChatGenerics>({
+    apiKey,
+    userData       : userToConnect,
+    tokenOrProvider: userToken
+  });
+  const toggleMobile = useMobileView();
+  const { themeClassName } = useThemeContext();
 
-        setClientReady(true);
-      } catch (e) {
-        console.error('Error connecting user:', error);
-        setError(e instanceof Error ? e.message : 'Unknown error occurred');
-      }
-    };
+  useChecklist(chatClient);
+  useUpdateAppHeightOnResize();
 
-    setupClient();
-
-    return () => {
-      client.disconnectUser();
-    };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  if (error) {
-    return <div>Error: {error}</div>;
+  if (!chatClient) {
+    return null; // render nothing until connection to the backend is established
   }
-
-  if (!clientReady) {
-    return <div>Loading...</div>;
-  }
-
-  const filters: ChannelFilters = {
-    type   : 'messaging',
-    members: { $in: ['example-user'] }
-  };
-  const options: ChannelOptions = {
-    state   : true,
-    presence: true,
-    limit   : 10
-  };
-  const sort: ChannelSort = {
-    last_message_at: -1,
-    updated_at     : -1
-  };
 
   return (
-    <Chat client={client}>
-      <ChannelList
-        filters={filters}
-        sort={sort}
-        options={options}
-        showChannelSearch
-      />
-      <Channel>
-        <Window>
-          <ChannelHeader />
-          <MessageList />
-          <MessageInput focus />
-        </Window>
-        <Thread />
-      </Channel>
+    <Chat
+      client={chatClient}
+      theme={clsx('messaging', themeClassName)}>
+      <ChatView>
+        <ChatView.Selector />
+        <ChatView.Channels>
+          <MessagingSidebar
+            channelListOptions={channelListOptions}
+            onClick={toggleMobile}
+            isCreating={isCreating}
+            setIsCreating={setIsCreating}
+            onCreateChannel={() => setIsCreating(!isCreating)}
+            onPreviewSelect={() => setIsCreating(false)}
+            toggleMobile={toggleMobile}
+          />
+          <Channel
+            maxNumberOfFiles={10}
+            multipleUploads={true}
+            SendButton={SendButton}
+            ThreadHeader={MessagingThreadHeader}
+            TypingIndicator={() => null}
+            EmojiPicker={EmojiPickerWithTheme}
+            emojiSearchIndex={SearchIndex}
+            enrichURLForPreview
+          >
+            <GiphyContextProvider>
+              <ChannelInner
+                theme={themeClassName}
+                toggleMobile={toggleMobile} />
+            </GiphyContextProvider>
+          </Channel>
+        </ChatView.Channels>
+        <ChatView.Threads>
+          <ThreadList />
+          <ChatView.ThreadAdapter>
+            <Thread virtualized />
+          </ChatView.ThreadAdapter>
+        </ChatView.Threads>
+      </ChatView>
     </Chat>
   );
-}
+};
 
 export default App;
